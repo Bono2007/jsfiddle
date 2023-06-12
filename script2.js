@@ -19,8 +19,6 @@ const game = new Phaser.Game(config);
 let gameScene = {
     acontGameBoys: [],
     acontFishes: [],
-    compteur: 0,
-    aContainerGrouped: [],
     clickedFirst: "",
     clickedSecond: ""
 };
@@ -31,10 +29,6 @@ function preload() {
 }
 
 function create() {
-    this.gameboys = [];
-    this.fishes = [];
-    this.fishCounter = 0;
-    this.gameBoyCounter = 0;
     this.aExprFacto = ["(x+2)(x+3)", "(2x+1)(2x-1)", "(x-3)(x+3)", "(4x-1)(4x+1)"];
     this.aExprDev = ["x²+5x+6", "4x²-1", "x²-9", "16x²-1"];
     this.cameras.main.setBackgroundColor("#ffffff");
@@ -74,24 +68,63 @@ function createGameObject(imageKey, text, position, containerArray, type) {
 
 function handlePointerDown(container) {
     if (container.type === "gameboy") {
-        this.gameBoyCounter++;
-        if (gameScene.clickedFirst === "") {
+        if (gameScene.clickedFirst === "fish") {
+            // Si un fish a déjà été cliqué
+            gameScene.clickedSecond = "gameboy";
+            gameScene.secondClickedContainer = container;
+
+            // On enregistre la position actuelle du fish
+            let targetX = gameScene.firstClickedContainer.x;
+            let targetY = gameScene.firstClickedContainer.y;
+            
+            // On crée un tween pour déplacer le fish vers le gameboy
+            let tween=this.tweens.add({
+                targets: container,
+                x: targetX,
+                y: targetY,
+                duration: 1000,
+                onUpdate: () => {
+                    // Met à jour la position cible du tween pour suivre le gameboy en mouvement
+                    tween.updateTo('x', gameScene.firstClickedContainer.x, true);
+                    tween.updateTo('y', gameScene.firstClickedContainer.y, true);
+                },
+                onComplete: () => {
+                    // On désactive la physique pour le gameboy
+                    container.body.stop();
+                    container.body.enable = false;
+
+                    // On ajoute le gameboy au conteneur du fish
+                    gameScene.firstClickedContainer.add(container);
+
+                    // On ajuste la position du gameboy à l'intérieur du conteneur du fish
+                    container.x = gameScene.firstClickedContainer.list[0].width;
+                    container.y = 0;
+
+                    // On réinitialise les clics
+                    gameScene.clickedFirst = "";
+                    gameScene.clickedSecond = "";
+                }
+            });
+        } else if (gameScene.clickedFirst === "") {
             // Si rien n'a été cliqué auparavant, on enregistre le gameboy cliqué
             gameScene.clickedFirst = "gameboy";
             gameScene.firstClickedContainer = container;
         }
     } else if (container.type === "fish") {
-        this.fishCounter++;
         if (gameScene.clickedFirst === "gameboy") {
             // Si un gameboy a déjà été cliqué
             gameScene.clickedSecond = "fish";
             gameScene.secondClickedContainer = container;
 
-            // On crée un tween pour déplacer le fish vers le gameboy
-            let tween = this.tweens.add({
+            // On enregistre la position actuelle du gameboy
+            let targetX = gameScene.firstClickedContainer.x;
+            let targetY = gameScene.firstClickedContainer.y;
+            
+            // On crée un tween pour déplacer le gameboy vers le fish
+            let tween=this.tweens.add({
                 targets: container,
-                x: gameScene.firstClickedContainer.x,
-                y: gameScene.firstClickedContainer.y,
+                x: targetX,
+                y: targetY,
                 duration: 1000,
                 onUpdate: () => {
                     // Met à jour la position cible du tween pour suivre le gameboy en mouvement
@@ -102,20 +135,23 @@ function handlePointerDown(container) {
                     // On désactive la physique pour le fish
                     container.body.stop();
                     container.body.enable = false;
-            
+
                     // On ajoute le fish au conteneur du gameboy
                     gameScene.firstClickedContainer.add(container);
-            
+
                     // On ajuste la position du fish à l'intérieur du conteneur du gameboy
                     container.x = gameScene.firstClickedContainer.list[0].width;
                     container.y = 0;
-            
 
-        // On réinitialise les clics
-        gameScene.clickedFirst = "";
-        gameScene.clickedSecond = "";
-    }
-});
+                    // On réinitialise les clics
+                    gameScene.clickedFirst = "";
+                    gameScene.clickedSecond = "";
+                }
+            });
+        } else if (gameScene.clickedFirst === "") {
+            // Si rien n'a été cliqué auparavant, on enregistre le fish cliqué
+            gameScene.clickedFirst = "fish";
+            gameScene.firstClickedContainer = container;
         }
     }
 
