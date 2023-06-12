@@ -1,3 +1,18 @@
+/**
+ * Je n'ai pas pu voir de code de tween ou de fusion là-dedans, donc j'ai supposé que c'était quelque chose d'autre
+
+Je suppose que vous voudrez désactiver la physique lorsque la tween est en cours d'exécution (c'est à dire en collant les 2 parties ensemble) sinon 
+ça va avoir l'air vraiment bizarre - donc dans votre click handler, je désactiverais la physique sur les deux objets, je créerais la tween pour les 
+coupler et dans le tween onComplete handler j'ajouterais alors l'objet de jeu 'fish' à celui 'gameboy' auquel il est collé - c'est à dire que je 
+l'ajouterais dans ce conteneur - puis j'activerais la physique juste sur le 'gameboy' à nouveau, et il traînera le poisson autour de lui.
+
+pour les séparer, il faut faire l'inverse : retirer les objets " poisson " du conteneur " gameboy " et réactiver leur physique.
+
+vous pouvez appeler sprite.body.stop() pour l'empêcher de se déplacer, mais vous devrez désactiver la physique ou si l'un des autres objets le heurte,
+ il sera de toute façon entraîné.
+ce qui aura l'air bizarre
+
+ */
 let config = {
     type: Phaser.AUTO,
     parent: "phaser-example",
@@ -16,6 +31,10 @@ let config = {
 let game = new Phaser.Game(config);
 const acontGameBoys = [];
 const acontFishes = [];
+let compteur=0;
+let aContainerGrouped = [];
+let clickedFirst = "";
+let clickedSecond="";
 
 function preload() {
     this.load.image("gauche", "/images/gauche.png");
@@ -113,7 +132,21 @@ function create() {
                 cont.list[0].setTint(0xffffff);
             });
             // Activer celui qu'on a cliqué
-            etatContainer(contGameBoy);
+            // etatContainer(contGameBoy); remplacé par apres
+            
+            // A SIMPLIFIER => fonction avec par ex container.list[0]==="fish" ou "gameboy"
+            // On teste si 1e clic
+            if (clickedFirst==="gameboy") {
+                // On avait déjà cliqué sur un autre container équivalent -> On change... rien
+            } else
+            if (clickedFirst==="fish") {
+                // On a déjà cliqué sur l'autre container
+                clickedSecond="gameboy"
+            } else {
+                // On n'a cliqué sur rien
+                clickedFirst="gameboy"
+            }
+
         });
 
         fish.on("pointerdown", () => {
@@ -125,10 +158,11 @@ function create() {
             });
             // Activer celui qu'on a cliqué
             etatContainer(contFish); // Appeler 'etatContainer'
+
         });
 
-        acontGameBoys.push(contGameBoy);
-        acontFishes.push(contFish);
+
+
     } //end for
 
     // Les collisions
@@ -159,32 +193,6 @@ function etatContainer(container) {
 }
 
 function update() {
-       const d=36.5;
-       let targetX = this.cameras.main.centerX;
-       let targetY = this.cameras.main.centerY;
-    
-        acontGameBoys.forEach((cont) => {
-            if (cont.etat === "cliqué") {
-                this.tweens.add({
-                    targets: cont,
-                    x: targetX-d,
-                    y: targetY,
-                    duration: 1000, // durée du mouvement en ms
-                    ease: 'Power2' // type d'interpolation
-                });
-            }
-        });
-    
-        acontFishes.forEach((cont) => {
-            if (cont.etat === "cliqué") {
-                this.tweens.add({
-                    targets: cont,
-                    x: targetX+d,
-                    y: targetY,
-                    duration: 1000, // durée du mouvement en ms
-                    ease: 'Power2' // type d'interpolation
-                });
-            }
-        });
+       
 }
 
