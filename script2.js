@@ -67,6 +67,27 @@ function createGameObject(imageKey, text, position, containerArray, type) {
 }
 
 function handlePointerDown(container) {
+    // Si le conteneur cliqué contient déjà un autre conteneur
+    if (container.list.length > 2) {
+        // On récupère le conteneur enfant
+        let childContainer = container.list[2];
+
+        // On retire le conteneur enfant du conteneur parent
+        container.remove(childContainer);
+
+        // On ajoute le conteneur enfant à la scène
+        this.add.existing(childContainer);
+
+        // On réactive la physique pour le conteneur enfant
+        this.physics.world.enable(childContainer);
+        childContainer.body.setVelocity(Phaser.Math.Between(-200, 200), Phaser.Math.Between(-150, 150));
+
+        // On réinitialise firstClickedContainer et clickedFirst
+        gameScene.firstClickedContainer = null;
+        gameScene.clickedFirst = "";
+        gameScene.secondClickedContainer = null;
+        gameScene.clickedSecond = "";
+    } else
     if (container.type === "gameboy") {
         if (gameScene.clickedFirst === "fish") {
             // Si un fish a déjà été cliqué
