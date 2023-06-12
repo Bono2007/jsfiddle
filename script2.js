@@ -72,11 +72,9 @@ function handlePointerDown(container) {
             // Si un fish a déjà été cliqué
             gameScene.clickedSecond = "gameboy";
             gameScene.secondClickedContainer = container;
-
             // On enregistre la position actuelle du fish
-            let targetX = gameScene.firstClickedContainer.x;
+            let targetX = gameScene.firstClickedContainer.x-gameScene.firstClickedContainer.list[0].width;
             let targetY = gameScene.firstClickedContainer.y;
-            
             // On crée un tween pour déplacer le fish vers le gameboy
             let tween=this.tweens.add({
                 targets: container,
@@ -85,7 +83,7 @@ function handlePointerDown(container) {
                 duration: 1000,
                 onUpdate: () => {
                     // Met à jour la position cible du tween pour suivre le gameboy en mouvement
-                    tween.updateTo('x', gameScene.firstClickedContainer.x, true);
+                    tween.updateTo('x', gameScene.firstClickedContainer.x-gameScene.firstClickedContainer.list[0].width, true);
                     tween.updateTo('y', gameScene.firstClickedContainer.y, true);
                 },
                 onComplete: () => {
@@ -97,7 +95,7 @@ function handlePointerDown(container) {
                     gameScene.firstClickedContainer.add(container);
 
                     // On ajuste la position du gameboy à l'intérieur du conteneur du fish
-                    container.x = gameScene.firstClickedContainer.list[0].width;
+                    container.x = -gameScene.firstClickedContainer.list[0].width;
                     container.y = 0;
 
                     // On réinitialise les clics
